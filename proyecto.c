@@ -1,6 +1,16 @@
 #include <allegro5/allegro.h>
-#include <allegro5/allegro_primitives.h> // Para dibujar el cubito
+#include <allegro5/allegro_primitives.h>
 #include <stdbool.h>
+
+#define MAXB 10
+
+typedef struct {
+
+ float x, y;
+ float dx, dy;
+ bool active;
+} bala;
+
 
 int main() {
 
@@ -23,7 +33,12 @@ int main() {
     
     float x = 320, y = 240;
     
-    bool keys[4] = {false, false, false, false}; 
+    bool keys[4] = {false, false, false, false};
+
+   bala balas[MAXB];
+   for(int i=0; i<MAXB; i++){
+	balas[i].active = false;
+   }
 
     al_start_timer(timer);
 
@@ -33,10 +48,22 @@ int main() {
 
 
         if(event.type == ALLEGRO_EVENT_TIMER) {
-            if(keys[0]) y -= 5;
-            if(keys[1]) x -= 5;
-            if(keys[2]) y += 5;
-            if(keys[3]) x += 5;
+            if(keys[0]) y -= 3;
+            if(keys[1]) x -= 3;
+            if(keys[2]) y += 3;
+            if(keys[3]) x += 3;
+
+	    for(int i=0;i<MAXB;i++){
+	if(balas[i].active){
+	balas[i].x += balas[i].dx;
+	balas[i].y += balas[i].dy;
+
+
+	if(balas[i].x < 0 || balas[i].x > 640 || balas[i].y < 0 || balas[i].y > 480) {
+		balas[i].active = false;
+	         }
+	       }
+	     }
             redraw = true;
         }
         else if(event.type == ALLEGRO_EVENT_KEY_DOWN) {
@@ -46,6 +73,27 @@ int main() {
                 case ALLEGRO_KEY_S: keys[2] = true; break;
                 case ALLEGRO_KEY_D: keys[3] = true; break;
             }
+	    float b_dx = 0, b_dy = 0;
+            bool disparo = false;
+	
+	 switch(event.keyboard.keycode) {
+                case ALLEGRO_KEY_UP:    b_dy = -8;  disparo = true; break;
+                case ALLEGRO_KEY_DOWN:  b_dy = 8;   disparo = true; break;
+                case ALLEGRO_KEY_LEFT:  b_dx = -8;  disparo = true; break;
+                case ALLEGRO_KEY_RIGHT: b_dx = 8;   disparo = true; break;
+		}
+	 if(disparo) {
+                for(int i = 0; i < MAXB; i++) {
+                    if(!balas[i].active) {
+                        balas[i].x = x + 15;
+                        balas[i].y = y + 15;
+                        balas[i].dx = b_dx;
+                        balas[i].dy = b_dy;
+                        balas[i].active = true;
+                        break;
+		    }
+	        }
+	}
         }
         else if(event.type == ALLEGRO_EVENT_KEY_UP) {
             switch(event.keyboard.keycode) {
@@ -63,7 +111,13 @@ int main() {
         if(redraw && al_is_event_queue_empty(queue)) {
             al_clear_to_color(al_map_rgb(0, 0, 0));
             
-            al_draw_filled_rectangle(x, y, x + 30, y + 30, al_map_rgb(0, 255, 0)); 
+            al_draw_filled_rectangle(x, y, x + 30, y + 30, al_map_rgb(0, 255, 0));
+
+	   for(int i = 0; i<MAXB; i++){
+		if(balas[i].active){
+		al_draw_filled_circle(balas[i].x, balas[i].y, 4, al_map_rgb(255, 255, 0));
+		}
+	   } 
             
             al_flip_display();
             redraw = false;
