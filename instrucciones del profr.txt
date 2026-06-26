@@ -1,0 +1,5 @@
+Instrucciones del profe
+
+Mostrar en pantalla vidas, balas, nivel
+
+poner texturas que lo lean del archivo
